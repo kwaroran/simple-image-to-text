@@ -44,26 +44,30 @@ const draw = () => {
                         continue;
                     }
                     else{
-                        let string = '';
-                        for(let i=0; i<prevLength; i++) {
-                            string += '■';
+                        if(prevLength > 0){
+                            let string = '';
+                            for(let i=0; i<prevLength; i++) {
+                                string += '■';
+                            }
+                            const rgbhex = '#'  + prevRgb[0].toString(16).padStart(2, '0')
+                                                + prevRgb[1].toString(16).padStart(2, '0')
+                                                + prevRgb[2].toString(16).padStart(2, '0');
+                            result += `<span style="color:${rgbhex}">${string}</span>`
                         }
-                        const rgbhex = '#'  + prevRgb[0].toString(16).padStart(2, '0')
-                                            + prevRgb[1].toString(16).padStart(2, '0')
-                                            + prevRgb[2].toString(16).padStart(2, '0');
-                        result += `<span style="color:${rgbhex}">${string}</span>`
                         prevRgb = rgb;
                         prevLength = 1;
                     }
                 }
-                let string = '';
-                for(let i=0; i<prevLength; i++) {
-                    string += '■';
+                if(prevLength > 0){
+                    let string = '';
+                    for(let i=0; i<prevLength; i++) {
+                        string += '■';
+                    }
+                    const rgbhex = '#'  + prevRgb[0].toString(16).padStart(2, '0')
+                        + prevRgb[1].toString(16).padStart(2, '0')
+                        + prevRgb[2].toString(16).padStart(2, '0');
+                    result += `<span style="color:${rgbhex}">${string}</span>`
                 }
-                const rgbhex = '#'  + prevRgb[0].toString(16).padStart(2, '0')
-                    + prevRgb[1].toString(16).padStart(2, '0')
-                    + prevRgb[2].toString(16).padStart(2, '0');
-                result += `<span style="color:${rgbhex}">${string}</span>`
                 result += '<br>';
             }
             result = `<div style="font-size: 4px; line-height: 4px; letter-spacing: 0px">${result}</div>`
