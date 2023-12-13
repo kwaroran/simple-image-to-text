@@ -1,8 +1,16 @@
 
 const fileInput = document.querySelector('#file-input');
+const textOutput = document.querySelector('#text-output');
+const resultDiv = document.querySelector('#result');
+const qualityInput = document.querySelector('#quality');
+const sizeInput = document.querySelector('#size');
 
-fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
+const draw = () => {
+    const file = fileInput.files[0];
+    if(!file){
+        return;
+    }
+    const maxSimularity = 1000 - (qualityInput.value * 10);
     //convert to canvas image
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -12,25 +20,26 @@ fileInput.addEventListener('change', (event) => {
             const ctx = canvas.getContext('2d');
 
             const aspect = img.width / img.height;
-            const height = 100 / aspect;
-            canvas.width = 100;
+            const width = sizeInput.value;
+            const height = width / aspect;
+            canvas.width = width;
             canvas.height = height;
-            ctx.drawImage(img, 0, 0, 100, height);
+            ctx.drawImage(img, 0, 0, width, height);
 
             //get image data
-            const imageData = ctx.getImageData(0, 0, 100, height);
+            const imageData = ctx.getImageData(0, 0, width, height);
             let result = '';
             for(let y=0; y<imageData.height; y++) {
-                let prevRgbHex = '';
+                let prevRgb = [0, 0, 0];
                 let prevLength = 0;
                 for(let x=0; x<imageData.width; x++) {
                     const index = (y * imageData.width + x) * 4;
                     const r = imageData.data[index + 0];
                     const g = imageData.data[index + 1];
                     const b = imageData.data[index + 2];
-                    const a = imageData.data[index + 3];
-                    const rgbhex = '#' + r.toString(16).padStart(2, '0') + g.toString(16).padStart(2, '0') + b.toString(16).padStart(2, '0');
-                    if(prevRgbHex === rgbhex) {
+                    const rgb = [r, g, b];
+                    const simularity = Math.abs(r - prevRgb[0]) + Math.abs(g - prevRgb[1]) + Math.abs(b - prevRgb[2]);
+                    if(maxSimularity >= simularity) {
                         prevLength++;
                         continue;
                     }
@@ -39,8 +48,11 @@ fileInput.addEventListener('change', (event) => {
                         for(let i=0; i<prevLength; i++) {
                             string += '■';
                         }
-                        result += `<span style="color:${prevRgbHex}">${string}</span>`
-                        prevRgbHex = rgbhex;
+                        const rgbhex = '#'  + prevRgb[0].toString(16).padStart(2, '0')
+                                            + prevRgb[1].toString(16).padStart(2, '0')
+                                            + prevRgb[2].toString(16).padStart(2, '0');
+                        result += `<span style="color:${rgbhex}">${string}</span>`
+                        prevRgb = rgb;
                         prevLength = 1;
                     }
                 }
@@ -48,16 +60,27 @@ fileInput.addEventListener('change', (event) => {
                 for(let i=0; i<prevLength; i++) {
                     string += '■';
                 }
-                result += `<span style="color:${prevRgbHex}">${string}</span>`
+                const rgbhex = '#'  + prevRgb[0].toString(16).padStart(2, '0')
+                    + prevRgb[1].toString(16).padStart(2, '0')
+                    + prevRgb[2].toString(16).padStart(2, '0');
+                result += `<span style="color:${rgbhex}">${string}</span>`
                 result += '<br>';
             }
             result = `<div style="font-size: 4px; line-height: 4px; letter-spacing: 0px">${result}</div>`
-            document.querySelector('#result').innerHTML = result;
-            const textOutput = document.querySelector('#text-output');
+            result += `<div style="margin-top: 5px; margin-bottom: 5px">${result.length} characters</div>`
+            resultDiv.innerHTML = result;
             textOutput.value = result;
             textOutput.disabled = false;
+            canvas.remove();
+            img.remove();
         }
         img.src = event.target.result;
     }
     reader.readAsDataURL(file);
-})
+}
+
+qualityInput.value = 97;
+sizeInput.value = 100;
+fileInput.addEventListener('change', draw)
+qualityInput.addEventListener('change', draw)
+sizeInput.addEventListener('change', draw)
