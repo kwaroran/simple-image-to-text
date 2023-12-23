@@ -10,7 +10,7 @@ const draw = () => {
     if(!file){
         return;
     }
-    const maxSimularity = 1000 - (qualityInput.value * 10);
+    const maxSimularity = 1000 - (qualityInput.value * 2);
     //convert to canvas image
     const reader = new FileReader();
     reader.onload = (event) => {
